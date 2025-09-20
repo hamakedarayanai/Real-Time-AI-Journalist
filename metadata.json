@@ -1,0 +1,5 @@
+{
+  "name": "Real-Time AI Journalist",
+  "description": "A next-generation news aggregator that uses AI to synthesize information from various sources into a comprehensive, multi-modal narrative, including infographics, audio summaries, and knowledge graphs.",
+  "requestFramePermissions": []
+}
