@@ -1,6 +1,38 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 import type { AnalysisResult } from '../types';
+
+export async function fetchArticleContent(url: string): Promise<string> {
+  if (!process.env.API_KEY) {
+    throw new Error("API_KEY environment variable not set");
+  }
+
+  try {
+    new URL(url);
+  } catch (_) {
+    throw new Error("Invalid URL provided. Please enter a valid URL.");
+  }
+
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+  const prompt = `Please fetch the main article text from the following URL and return only the text content. Exclude all HTML, navigation links, ads, and other non-article text.
+  URL: ${url}`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+    });
+
+    const content = response.text;
+    if (!content || content.trim().length < 50) {
+      throw new Error("Could not extract meaningful content. The URL might lead to a non-article page, be protected, or require a login.");
+    }
+    return content.trim();
+  } catch (error) {
+    console.error("Error calling Gemini API for URL fetch:", error);
+    throw new Error("Failed to fetch article content from the URL. The AI model could not process the request.");
+  }
+}
 
 const analysisSchema = {
   type: Type.OBJECT,

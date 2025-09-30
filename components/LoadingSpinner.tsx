@@ -1,7 +1,15 @@
-
 import React from 'react';
 
-const LoadingSpinner: React.FC = () => {
+interface LoadingSpinnerProps {
+  isFetching?: boolean;
+}
+
+const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ isFetching }) => {
+  const title = isFetching ? "Fetching Article..." : "Analyzing Report...";
+  const description = isFetching 
+    ? "The AI is reading the article from the provided URL." 
+    : "The AI journalist is synthesizing the information. This may take a moment.";
+
   return (
     <div className="flex flex-col items-center justify-center h-full bg-slate-800/50 border-2 border-dashed border-slate-700 rounded-lg p-8">
       <svg
@@ -25,10 +33,10 @@ const LoadingSpinner: React.FC = () => {
         ></path>
       </svg>
       <h2 className="text-2xl font-bold text-slate-400 mt-4 animate-pulse-fast">
-        Analyzing Report...
+        {title}
       </h2>
       <p className="text-slate-500 mt-2">
-        The AI journalist is synthesizing the information. This may take a moment.
+        {description}
       </p>
     </div>
   );
