@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 
 interface InputPanelProps {
@@ -13,6 +14,7 @@ const sampleText = `San Francisco, CA - In a landmark announcement, tech giant Q
 
 const InputPanel: React.FC<InputPanelProps> = ({ text, onTextChange, onAnalyze, onFetch, isLoading, isFetching }) => {
   const [url, setUrl] = useState<string>('');
+  const maxChars = 15000;
 
   const handleAnalyzeClick = () => {
     onAnalyze();
@@ -25,11 +27,16 @@ const InputPanel: React.FC<InputPanelProps> = ({ text, onTextChange, onAnalyze, 
   const handleUseSample = () => {
       onTextChange(sampleText);
   }
+
+  const handleClearText = () => {
+      onTextChange('');
+  }
   
   const isBusy = isLoading || isFetching;
+  const textIsOverLimit = text.length > maxChars;
 
   return (
-    <div className="bg-slate-800 p-6 rounded-lg shadow-lg h-full flex flex-col">
+    <div className="bg-slate-800 p-6 rounded-lg shadow-lg h-full flex flex-col sticky top-24">
       <h2 className="text-xl font-semibold mb-4 text-slate-200 flex items-center">
         <ion-icon name="document-text-outline" class="mr-2 text-2xl text-cyan-400"></ion-icon>
         News Source
@@ -47,7 +54,7 @@ const InputPanel: React.FC<InputPanelProps> = ({ text, onTextChange, onAnalyze, 
         <button
           onClick={handleFetchClick}
           disabled={isBusy || !url.trim()}
-          className="w-full sm:w-auto flex-shrink-0 bg-indigo-600 text-white font-bold py-2 px-4 rounded-md hover:bg-indigo-500 transition duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full sm:w-auto flex-shrink-0 bg-indigo-600 text-white font-bold py-2 px-4 rounded-md hover:bg-indigo-500 transition duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-slate-800"
         >
           {isFetching ? (
              <>
@@ -76,21 +83,31 @@ const InputPanel: React.FC<InputPanelProps> = ({ text, onTextChange, onAnalyze, 
         value={text}
         onChange={(e) => onTextChange(e.target.value)}
         placeholder="Paste news article here..."
-        className="w-full flex-grow bg-slate-900 border border-slate-700 rounded-md p-3 text-slate-300 focus:ring-2 focus:ring-cyan-500 focus:outline-none transition duration-200 resize-none"
+        className={`w-full flex-grow bg-slate-900 border ${textIsOverLimit ? 'border-red-500' : 'border-slate-700'} rounded-md p-3 text-slate-300 focus:ring-2 focus:ring-cyan-500 focus:outline-none transition duration-200 resize-none`}
         disabled={isBusy}
       />
+       <div className="text-right text-sm text-slate-500 mt-1">
+        <span className={textIsOverLimit ? 'text-red-400 font-semibold' : ''}>{text.length}</span> / {maxChars}
+      </div>
       <div className="mt-4 flex flex-col sm:flex-row gap-2">
         <button
             onClick={handleUseSample}
             disabled={isBusy}
-            className="w-full sm:w-auto flex-shrink-0 bg-slate-700 text-slate-300 font-semibold py-2 px-4 rounded-md hover:bg-slate-600 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full sm:w-auto bg-slate-700 text-slate-300 font-semibold py-2 px-4 rounded-md hover:bg-slate-600 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-slate-600 focus-visible:ring-offset-slate-800"
         >
-            Use Sample Text
+            Sample
+        </button>
+        <button
+            onClick={handleClearText}
+            disabled={isBusy || !text.trim()}
+            className="w-full sm:w-auto bg-slate-700 text-slate-300 font-semibold py-2 px-4 rounded-md hover:bg-slate-600 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-slate-600 focus-visible:ring-offset-slate-800"
+        >
+            Clear
         </button>
         <button
           onClick={handleAnalyzeClick}
-          disabled={isBusy || !text.trim()}
-          className="w-full sm:w-auto flex-grow bg-cyan-600 text-white font-bold py-2 px-6 rounded-md hover:bg-cyan-500 transition duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={isBusy || !text.trim() || textIsOverLimit}
+          className="w-full sm:w-auto flex-grow bg-cyan-600 text-white font-bold py-2 px-6 rounded-md hover:bg-cyan-500 transition duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-slate-800"
         >
           {isLoading ? (
             <>

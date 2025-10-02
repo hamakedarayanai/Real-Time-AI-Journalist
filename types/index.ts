@@ -1,6 +1,7 @@
 
-// Fix: Import React's types to make them available for the JSX namespace augmentation.
-import 'react';
+
+// Fix: Import React to bring the `React` namespace into scope for type definitions.
+import React from 'react';
 
 // Fix: Add a global declaration for ion-icon to allow its use in JSX. This resolves TypeScript errors across multiple components.
 declare global {

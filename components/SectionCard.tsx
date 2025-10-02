@@ -9,7 +9,7 @@ interface SectionCardProps {
 
 const SectionCard: React.FC<SectionCardProps> = ({ icon, title, children }) => {
   return (
-    <div className="bg-slate-800/50 border border-slate-700 rounded-lg shadow-lg overflow-hidden">
+    <div className="bg-slate-800/50 border border-slate-700 rounded-lg shadow-lg overflow-hidden transition-all duration-300 hover:border-slate-600 hover:shadow-cyan-500/10 hover:shadow-2xl">
       <div className="p-4 md:p-6 border-b border-slate-700">
         <h3 className="text-lg md:text-xl font-semibold text-slate-200 flex items-center">
           <ion-icon name={icon} class="mr-3 text-2xl text-cyan-400"></ion-icon>

@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
-import type { KnowledgeGraphData, KnowledgeGraphNode, KnowledgeGraphLink } from '../types';
+import type { KnowledgeGraphData } from '../types';
 
 declare const d3: any;
 
@@ -38,11 +38,12 @@ const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ data }) => {
 
     const link = svg.append("g")
       .attr("stroke", "#94a3b8")
-      .attr("stroke-opacity", 0.6)
       .selectAll("line")
       .data(links)
       .join("line")
-      .attr("stroke-width", 1.5);
+      .attr("stroke-width", 1.5)
+      .attr("stroke-opacity", 0.6)
+      .style('transition', 'stroke-opacity 0.2s ease');
 
     const linkLabel = svg.append("g")
         .selectAll(".linkLabel")
@@ -51,12 +52,14 @@ const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ data }) => {
         .attr("class", "linkLabel")
         .attr("fill", "#64748b")
         .style("font-size", "10px")
+        .style('transition', 'opacity 0.2s ease')
         .text((d: any) => d.relationship);
 
     const node = svg.append("g")
       .selectAll("g")
       .data(nodes)
       .join("g")
+      .style("cursor", "pointer")
       .call(d3.drag()
           .on("start", dragstarted)
           .on("drag", dragged)
@@ -66,14 +69,41 @@ const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ data }) => {
         .attr("r", 8)
         .attr("fill", (d: any) => groupColors[d.group] || groupColors.default)
         .attr("stroke", "#1e293b")
-        .attr("stroke-width", 2);
+        .attr("stroke-width", 2)
+        .style('transition', 'opacity 0.2s ease');
 
     node.append("text")
         .attr("x", 12)
         .attr("y", "0.31em")
         .text((d: any) => d.id)
         .attr("fill", "#e2e8f0")
-        .style("font-size", "12px");
+        .style("font-size", "12px")
+        .style('transition', 'opacity 0.2s ease');
+
+    // Add interaction
+    const linkedByIndex: { [key: string]: boolean } = {};
+    links.forEach((d: any) => {
+        linkedByIndex[`${d.source.id},${d.target.id}`] = true;
+    });
+
+    function areNodesConnected(a: any, b: any) {
+        return linkedByIndex[`${a.id},${b.id}`] || linkedByIndex[`${b.id},${a.id}`] || a.id === b.id;
+    }
+
+    function handleMouseOver(event: any, d: any) {
+        node.style("opacity", (o: any) => areNodesConnected(d, o) ? 1 : 0.2);
+        link.style("stroke-opacity", (l: any) => (l.source === d || l.target === d) ? 0.8 : 0.1);
+        linkLabel.style("opacity", (l: any) => (l.source === d || l.target === d) ? 1 : 0.1);
+    }
+
+    function handleMouseOut() {
+        node.style("opacity", 1);
+        link.style("stroke-opacity", 0.6);
+        linkLabel.style("opacity", 1);
+    }
+
+    node.on("mouseover", handleMouseOver).on("mouseout", handleMouseOut);
+
 
     simulation.on("tick", () => {
       link
@@ -94,6 +124,7 @@ const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ data }) => {
       if (!event.active) simulation.alphaTarget(0.3).restart();
       d.fx = d.x;
       d.fy = d.y;
+      handleMouseOut(); // Stop hover effect on drag
     }
 
     function dragged(event: any, d: any) {
@@ -115,7 +146,7 @@ const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ data }) => {
 
   return (
     <div>
-        <div className="flex flex-wrap gap-4 mb-4">
+        <div className="flex flex-wrap gap-x-4 gap-y-2 mb-4">
             {Object.entries(groupColors).map(([group, color]) => 
                 group !== 'default' && (
                 <div key={group} className="flex items-center">
